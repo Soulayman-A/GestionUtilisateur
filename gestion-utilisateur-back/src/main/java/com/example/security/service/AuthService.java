@@ -9,7 +9,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthService implements UserDetailsService {
@@ -45,21 +46,11 @@ public class AuthService implements UserDetailsService {
         user.setPassword(passwordEncoder.encode(rawPassword));
         user.setRole("ROLE_USER");
 
-        User savedUser = userRepository.save(user);
-
-        return savedUser;
+        return userRepository.save(user);
     }
 
-    public String login(String username, String rawPassword) {
-
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
-        }
-
-        return jwtService.generateToken(user.getUsername());
+    public String login(String username, String role) {
+        return jwtService.generateToken(username, role);
     }
 
     @Override
@@ -70,7 +61,8 @@ public class AuthService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority(user.getRole()))
+                List.of(new SimpleGrantedAuthority(user.getRole().trim()))
         );
+
     }
 }
