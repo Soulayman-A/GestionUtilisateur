@@ -7,7 +7,7 @@ const LoginPage = () => {
 
   // Fonction login
   async function login(e) {
-    e.preventDefault(); // empêche le rechargement de la page
+    e.preventDefault();
     console.log("Login déclenché !");
 
     try {
@@ -33,8 +33,8 @@ const LoginPage = () => {
   }
 
   return (
-    <VStack p="100px" display="flex" justify="center">
-      <VStack h="670px" w="600px">
+    <VStack p="100px" display="flex" justify="center" align={"center"}>
+      <VStack h="670px" display="flex" align={"center"}>
         <form onSubmit={login}>
           <Field.Root orientation="vertical">
             <Field.Label>Username</Field.Label>
@@ -54,10 +54,10 @@ const LoginPage = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </Field.Root>
+          <Button mt={4} type="submit" colorScheme="blue" w="100%">
+            Sign In
+          </Button>
         </form>
-        <Button type="submit" colorScheme="blue" w="full">
-          Sign In
-        </Button>
       </VStack>
     </VStack>
   );
