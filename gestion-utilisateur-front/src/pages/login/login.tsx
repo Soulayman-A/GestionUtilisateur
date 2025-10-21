@@ -26,40 +26,35 @@ const LoginPage = () => {
       }
 
       const result = await response.json();
-      console.log("✅ Login réussi :", result);
+      console.log("Login réussi :", result);
     } catch (error) {
-      console.error("❌ Erreur de login :", error.message);
+      console.error(" Erreur de login :", error.message);
     }
   }
 
   return (
     <VStack p="100px" display="flex" justify="center">
-      <VStack
-        h="670px"
-        w="600px"
-        as="form"
-        onSubmit={login} // formulaire gère l'envoi
-        spacing={4}
-      >
-        <Field.Root orientation="vertical">
-          <Field.Label>Username</Field.Label>
-          <Input
-            placeholder="Username..."
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </Field.Root>
+      <VStack h="670px" w="600px">
+        <form onSubmit={login}>
+          <Field.Root orientation="vertical">
+            <Field.Label>Username</Field.Label>
+            <Input
+              placeholder="Username..."
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </Field.Root>
 
-        <Field.Root orientation="vertical">
-          <Field.Label>Password</Field.Label>
-          <Input
-            type="password"
-            placeholder="Password..."
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </Field.Root>
-
+          <Field.Root orientation="vertical">
+            <Field.Label>Password</Field.Label>
+            <Input
+              type="password"
+              placeholder="Password..."
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </Field.Root>
+        </form>
         <Button type="submit" colorScheme="blue" w="full">
           Sign In
         </Button>
