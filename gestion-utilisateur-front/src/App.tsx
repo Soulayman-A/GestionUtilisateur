@@ -1,10 +1,11 @@
-import Login from "./pages/login/login";
+import RoutesIndex from "./route";
+import { AuthProvider } from "./context/AuthContext";
 
 const App = () => {
   return (
-    <>
-      <Login />
-    </>
+    <AuthProvider>
+      <RoutesIndex />
+    </AuthProvider>
   );
 };
 
