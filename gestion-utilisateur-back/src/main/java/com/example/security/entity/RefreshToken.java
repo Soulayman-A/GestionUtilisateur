@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.Date;
 
 @Entity
 @Data
@@ -23,7 +24,7 @@ public class RefreshToken {
     private String token;
 
     @Column(nullable = false)
-    private Instant expiryDate;
+    private Date expiryDate;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
