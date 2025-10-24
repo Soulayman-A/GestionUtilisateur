@@ -7,7 +7,9 @@ import {
 } from "react";
 
 interface User {
+  id?: number;
   username: string;
+  role?: string;
 }
 
 interface AuthContextType {
@@ -27,7 +29,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
     const savedUser = localStorage.getItem("user");
-
     if (savedToken && savedUser) {
       setToken(savedToken);
       setUser(JSON.parse(savedUser));
@@ -35,19 +36,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = (newToken: string, username: string) => {
-    console.log("Token reçu dans login():", newToken);
-    console.log("Username reçu dans login():", username);
-
     setToken(newToken);
     const userData = { username };
     setUser(userData);
     localStorage.setItem("token", newToken);
     localStorage.setItem("user", JSON.stringify(userData));
-
-    console.log(
-      "Token sauvegardé dans localStorage:",
-      localStorage.getItem("token"),
-    );
   };
 
   const logout = () => {
@@ -67,10 +60,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     </AuthContext.Provider>
   );
 };
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth doit être utiliser entre un AuthProvider");
-  }
+  if (!context)
+    throw new Error("useAuth doit être utilisé entre un AuthProvider");
   return context;
 };

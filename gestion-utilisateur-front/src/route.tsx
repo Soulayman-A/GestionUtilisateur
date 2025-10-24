@@ -3,6 +3,8 @@ import LoginPage from "./pages/login/login";
 import RegisterPage from "./pages/register/register";
 import Dashboard from "./pages/dashboard/dashboard";
 import Admin from "./pages/admin/admin";
+import AdminUsers from "./pages/admin/users/users";
+import { PrivateRoute } from "./PrivateRoute";
 
 const RoutesIndex = () => {
   return (
@@ -12,6 +14,9 @@ const RoutesIndex = () => {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/" element={<Dashboard />} />
         <Route path="/admin" element={<Admin />} />
+        <Route element={<PrivateRoute />}>
+          <Route path="/admin/users" element={<AdminUsers />} />
+        </Route>{" "}
       </Routes>
     </Router>
   );

@@ -71,6 +71,10 @@ const AdminPage = () => {
     navigate("/");
   };
 
+  const gestionUtilisateur = () => {
+    navigate("/admin/users");
+  };
+
   if (loading) {
     return (
       <Box
@@ -225,6 +229,7 @@ const AdminPage = () => {
                 border="1px solid"
                 borderColor="blue.500"
                 color="blue.400"
+                onClick={gestionUtilisateur}
                 _hover={{
                   bg: "rgba(59, 130, 246, 0.2)",
                   borderColor: "blue.400",
