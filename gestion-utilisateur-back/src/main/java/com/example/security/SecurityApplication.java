@@ -11,8 +11,6 @@ public class SecurityApplication {
 
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(SecurityApplication.class);
-
-        // 🔹 Charge .env AVANT Spring Boot
         app.addInitializers((ApplicationContextInitializer<ConfigurableApplicationContext>) ctx -> {
             Dotenv dotenv = Dotenv.load();
             dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));

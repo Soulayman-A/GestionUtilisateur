@@ -6,20 +6,10 @@ public class AuthResponse {
     private String username;
     private String tokenType = "Bearer";
 
-    public AuthResponse() {
-    }
-
     public AuthResponse(String accessToken, String refreshToken, String username) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.username = username;
-    }
-
-    public AuthResponse(String accessToken, String refreshToken, String username, String tokenType) {
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
-        this.username = username;
-        this.tokenType = tokenType;
     }
 
     public String getAccessToken() {

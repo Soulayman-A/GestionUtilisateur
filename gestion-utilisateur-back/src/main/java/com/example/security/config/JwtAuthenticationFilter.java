@@ -20,7 +20,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -40,18 +39,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
+        // Récupère le header Authorization
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            // Pas de token : on continue la chaîne de filtres sans authentification
             filterChain.doFilter(request, response);
             return;
         }
 
-        final String token = authHeader.substring(7);
+        final String token = authHeader.substring(7); // Supprime "Bearer "
         try {
             String username = jwtService.extractUsername(token);
+
+            // Vérifie si l'utilisateur n'est pas déjà authentifié dans le contexte
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
+                // Valide le token et crée l'authentification
                 if (jwtService.isTokenValid(token, userDetails.getUsername())) {
                     String role = jwtService.extractRole(token);
                     List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
@@ -60,10 +64,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
 
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    // Met l'utilisateur authentifié dans le contexte de sécurité
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
         } catch (Exception e) {
+            // Erreurs de token ignorées : la requête continue sans authentification
         }
 
         filterChain.doFilter(request, response);

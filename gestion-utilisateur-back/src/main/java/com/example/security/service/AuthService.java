@@ -1,5 +1,7 @@
 package com.example.security.service;
 
+import com.example.security.dto.AuthResponse;
+import com.example.security.dto.UserDTO;
 import com.example.security.entity.User;
 import com.example.security.repository.UserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -10,7 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class AuthService implements UserDetailsService {
@@ -43,16 +44,40 @@ public class AuthService implements UserDetailsService {
 
         User user = new User();
         user.setUsername(username.trim());
+        //Encode le MDP
         user.setPassword(passwordEncoder.encode(rawPassword));
+        // Attribut le rôle utilisateur dès la création du compte
         user.setRole("ROLE_USER");
 
         return userRepository.save(user);
     }
-
+    // Génère le token pour l'utilisateur
     public String login(String username, String role) {
         return jwtService.generateToken(username, role);
     }
 
+    public List<UserDTO> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(user -> new UserDTO(user.getId(), user.getUsername(), user.getRole()))
+                .toList();
+    }
+
+    public void updateRole(Long userId, String newRole) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+
+        // Vérifie le format du rôle
+        if (!newRole.startsWith("ROLE_")) {
+            newRole = "ROLE_" + newRole.toUpperCase();
+        }
+
+        user.setRole(newRole);
+        userRepository.save(user);
+    }
+
+
+    //Charge les utilisateurs par leurs nom d'utilisateur.
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
