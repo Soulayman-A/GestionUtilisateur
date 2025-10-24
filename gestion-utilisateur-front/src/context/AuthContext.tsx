@@ -24,7 +24,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
 
-  // Charger le token au démarrage
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
     const savedUser = localStorage.getItem("user");
@@ -36,8 +35,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = (newToken: string, username: string) => {
-    console.log("Token reçu dans login():", newToken); // Debug
-    console.log("Username reçu dans login():", username); // Debug
+    console.log("Token reçu dans login():", newToken);
+    console.log("Username reçu dans login():", username);
 
     setToken(newToken);
     const userData = { username };

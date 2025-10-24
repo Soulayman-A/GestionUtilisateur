@@ -1,12 +1,4 @@
-import {
-  VStack,
-  Text,
-  Button,
-  Box,
-  HStack,
-  Card,
-  Stack,
-} from "@chakra-ui/react";
+import { VStack, Text, Button, Box, HStack, Card } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
