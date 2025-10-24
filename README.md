@@ -62,12 +62,17 @@ cd gestionutilisateur
     *   The application uses `spring.jpa.hibernate.ddl-auto=update`, which allows Hibernate to automatically create and update the `users` table based on the `User` entity. Alternatively, you can run the provided `src/main/resources/schema.sql` script to create the table manually.
 
 3.  **Application Properties:**
-    *   Open `src/main/resources/application.properties`.
-    *   Uncomment and update the `spring.datasource.username` and `spring.datasource.password` properties with your MySQL credentials.
+    *   Create a .env.
+    
         ```properties
-        spring.datasource.username=your_mysql_username
-        spring.datasource.password=your_mysql_password
+        DATABASE_URL=jdbc:mysql://localhost:3306/your_db_name
+        DATABASE_USERNAME=your_db_username
+        DATABASE_PASSWORD=your_db_password
+
+        JWT_SECRET=your_jwt_secret_here
+        JWT_EXPIRATION=86400000
         ```
+    *    Replace the values with your own.
 
 4.  **Run the Backend:**
     ```bash
