@@ -1,6 +1,6 @@
 # GestionUtilisateur
 
-This repository contains a full-stack user management application. It features a secure backend built with Java and Spring Boot, using JWT for authentication, and a responsive frontend developed with React, TypeScript, and Chakra UI.
+This repository contains a full-stack user management application. It features a secure backend built with Java and Spring Boot, using JWT for authentication, and a frontend developed with React, TypeScript, and Chakra UI.
 
 ## Features
 
