@@ -110,6 +110,7 @@ The backend exposes the following endpoints for authentication. All other endpoi
     ```json
     {
       "username": "newuser",
+      "email": "newemail",
       "password": "password123"
     }
     ```
