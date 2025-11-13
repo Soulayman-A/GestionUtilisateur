@@ -1,5 +1,6 @@
 package com.example.security.controller;
 
+import com.example.security.service.MailtrapEmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.example.security.dto.AuthResponse;
@@ -17,25 +18,28 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import com.example.security.service.MailtrapEmailService;
+
 
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     private final AuthService authService;
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenService refreshTokenService;
+    private final MailtrapEmailService mailService;
 
     public AuthController(AuthService authService,
                           PasswordEncoder passwordEncoder,
-                          RefreshTokenService refreshTokenService) {
+                          RefreshTokenService refreshTokenService, MailtrapEmailService mailService) {
         this.authService = authService;
         this.passwordEncoder = passwordEncoder;
         this.refreshTokenService = refreshTokenService;
+        this.mailService = mailService;
     }
 
     @PostMapping("/register")
@@ -43,11 +47,16 @@ public class AuthController {
         if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Username is required");
         }
+        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Email is required");
+        }
         if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Password is required");
         }
 
-        User user = authService.register(request.getUsername(), request.getPassword());
+        User user = authService.register(request.getUsername(), request.getEmail(), request.getPassword());
+        mailService.sendEmailTo(user.getEmail());
+
         return ResponseEntity.ok("User registered successfully: " + user.getUsername());
     }
 

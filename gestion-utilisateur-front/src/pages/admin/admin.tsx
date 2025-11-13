@@ -25,7 +25,7 @@ const AdminPage = () => {
       }
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/auth/admin`,
+        `${import.meta.env.VITE_API_URL}/admin/users`,
         {
           method: "GET",
           headers: {
@@ -195,12 +195,9 @@ const AdminPage = () => {
           border="2px solid rgba(34, 197, 94, 0.3)"
         >
           <VStack align="start" gap={3}>
-            <HStack>
               <Text fontSize="xl" fontWeight="semibold" color="green.400">
                 Accès administrateur accordé
               </Text>
-            </HStack>
-            <Text color="gray.400">{adminData}</Text>
           </VStack>
         </Box>
 

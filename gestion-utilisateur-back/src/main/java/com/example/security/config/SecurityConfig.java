@@ -19,6 +19,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -57,10 +58,10 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> {}) // active CORS
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Configuration CORS explicite
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // login, register, refresh
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // endpoints admin
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // autorise l'endpoints admin que pour l'admin
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )
@@ -77,12 +78,38 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // ton front React
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+
+        // Origines autorisées
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:5173",
+                "http://localhost:3000"
+        ));
+
+        // Méthodes HTTP autorisées
+        configuration.setAllowedMethods(Arrays.asList(
+                "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
+        ));
+
+        // Headers autorisés (tous les headers)
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+
+        // Headers exposés au client
+        configuration.setExposedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Type"
+        ));
+
+        // Autoriser les credentials
         configuration.setAllowCredentials(true);
+
+        // Cache de la configuration CORS
+        configuration.setMaxAge(3600L);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+
+        // Important : appliquer la config CORS à tous les endpoints
         source.registerCorsConfiguration("/**", configuration);
+
         return source;
     }
 }

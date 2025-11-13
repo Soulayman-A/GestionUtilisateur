@@ -37,42 +37,52 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
 
-        // Récupère le header Authorization
-        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            // Pas de token : on continue la chaîne de filtres sans authentification
+        String path = request.getServletPath();
+        if (path.startsWith("/api/auth/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        // Ignorer toutes les routes publiques (login, register, refresh, logout)
+        if (path.startsWith("/api/auth/")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        final String token = authHeader.substring(7); // Supprime "Bearer "
+        // Vérifie la présence du header Authorization
+        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        final String token = authHeader.substring(7);
         try {
             String username = jwtService.extractUsername(token);
 
-            // Vérifie si l'utilisateur n'est pas déjà authentifié dans le contexte
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                // Valide le token et crée l'authentification
                 if (jwtService.isTokenValid(token, userDetails.getUsername())) {
                     String role = jwtService.extractRole(token);
-                    List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
+                    List<SimpleGrantedAuthority> authorities =
+                            List.of(new SimpleGrantedAuthority(role));
 
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
 
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                    // Met l'utilisateur authentifié dans le contexte de sécurité
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
         } catch (Exception e) {
-            // Erreurs de token ignorées : la requête continue sans authentification
+            // On log juste pour debug
+            logger.warn("JWT verification failed: {}", e.getMessage());
         }
 
         filterChain.doFilter(request, response);
     }
+
 }

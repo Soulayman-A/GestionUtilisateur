@@ -1,7 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { Button, VStack, Input, Field, Text, Box } from "@chakra-ui/react";
+import {
+  Button,
+  VStack,
+  Input,
+  Field,
+  Text,
+  Box,
+  Link,
+  HStack,
+} from "@chakra-ui/react";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -54,6 +63,9 @@ const LoginPage = () => {
       setLoading(false);
     }
   }
+    const handleBack = () => {
+        navigate(-1);
+    };
 
   return (
     <Box
@@ -64,7 +76,7 @@ const LoginPage = () => {
       justifyContent="center"
       p={4}
     >
-      <VStack
+      <Box
         gap={6}
         w="100%"
         maxW="400px"
@@ -74,15 +86,28 @@ const LoginPage = () => {
         borderRadius="xl"
         border="1px solid rgba(255, 255, 255, 0.1)"
       >
-        <Text
-          fontSize="3xl"
-          fontWeight="bold"
-          bgGradient="linear(to-r, cyan.400, blue.500)"
-          bgClip="text"
-          color={"white"}
-        >
-          Connexion
-        </Text>
+          <HStack>
+              <Text
+                  justifyContent={"center"}
+                  fontSize="3xl"
+                  fontWeight="bold"
+                  bgGradient="linear(to-r, cyan.400, blue.500)"
+                  bgClip="text"
+                  color={"white"}
+              >
+                  Connexion
+              </Text>
+              <Box flex={1} display="flex" justifyContent="flex-end">
+                  <Button
+                      onClick={handleBack}
+                      variant="ghost"
+                      color="white"
+                      _hover={{ bg: "rgba(255, 255, 255, 0.1)" }}
+                  >
+                      {"Retour"}
+                  </Button>
+              </Box>
+          </HStack>
 
         <VStack as="form" onSubmit={handleLogin} gap={4} w="100%">
           <Field.Root orientation="vertical" w="100%">
@@ -148,8 +173,11 @@ const LoginPage = () => {
           >
             Se connecter
           </Button>
+            <Link href="/register">
+                <Text fontSize="16">Pas de compte ?</Text>
+            </Link>
         </VStack>
-      </VStack>
+      </Box>
     </Box>
   );
 };

@@ -4,6 +4,8 @@ import com.example.security.dto.AuthResponse;
 import com.example.security.dto.UserDTO;
 import com.example.security.entity.User;
 import com.example.security.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -28,10 +30,14 @@ public class AuthService implements UserDetailsService {
         this.jwtService = jwtService;
     }
 
-    public User register(String username, String rawPassword) {
+    public User register(String username, String email, String rawPassword) {
 
         if (username == null || username.trim().isEmpty()) {
             throw new RuntimeException("Username cannot be null or empty");
+        }
+
+        if (email == null || email.trim().isEmpty()) {
+            throw new RuntimeException("Email cannot be null or empty");
         }
 
         if (rawPassword == null || rawPassword.trim().isEmpty()) {
@@ -42,8 +48,13 @@ public class AuthService implements UserDetailsService {
             throw new RuntimeException("Username already exists");
         }
 
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new RuntimeException("Email already exists");
+        }
+
         User user = new User();
         user.setUsername(username.trim());
+        user.setEmail(email.trim());
         //Encode le MDP
         user.setPassword(passwordEncoder.encode(rawPassword));
         // Attribut le rôle utilisateur dès la création du compte
@@ -56,11 +67,9 @@ public class AuthService implements UserDetailsService {
         return jwtService.generateToken(username, role);
     }
 
-    public List<UserDTO> getAllUsers() {
-        return userRepository.findAll()
-                .stream()
-                .map(user -> new UserDTO(user.getId(), user.getUsername(), user.getRole()))
-                .toList();
+    public Page<UserDTO> getAllUsers(Pageable pageable) {
+        Page<User> users = userRepository.findAll(pageable);
+        return users.map(user -> new UserDTO(user.getId(), user.getUsername(), user.getRole()));
     }
 
     public void updateRole(Long userId, String newRole) {
