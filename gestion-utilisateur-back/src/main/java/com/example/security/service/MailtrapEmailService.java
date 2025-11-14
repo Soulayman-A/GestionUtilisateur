@@ -17,9 +17,9 @@ public class MailtrapEmailService {
 
     public MailtrapEmailService(@Value("${mailtrap.api-key}") String mailtrapKey) {
         MailtrapConfig config = new MailtrapConfig.Builder()
-                .sandbox(true)
-                .inboxId(4178007L)
-                .token(mailtrapKey)
+                .sandbox(true) //Mode Sandbox
+                .inboxId(4178007L) //Id de la boite mail sur Mailtrap
+                .token(mailtrapKey) //Clé api de mailtrap
                 .build();
 
         this.client = MailtrapClientFactory.createMailtrapClient(config);
@@ -35,7 +35,7 @@ public class MailtrapEmailService {
                 .build();
 
         try {
-            client.send(mail);
+            client.send(mail); // envoie de l'email
         } catch (Exception e) {
             System.out.println("Erreur envoi email : " + e.getMessage());
         }

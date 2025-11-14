@@ -30,7 +30,7 @@ public class AuthService implements UserDetailsService {
         this.jwtService = jwtService;
     }
 
-    public User register(String username, String email, String rawPassword) {
+    public User register(String username, String email, String password) {
 
         if (username == null || username.trim().isEmpty()) {
             throw new RuntimeException("Username cannot be null or empty");
@@ -40,7 +40,7 @@ public class AuthService implements UserDetailsService {
             throw new RuntimeException("Email cannot be null or empty");
         }
 
-        if (rawPassword == null || rawPassword.trim().isEmpty()) {
+        if (password == null || password.trim().isEmpty()) {
             throw new RuntimeException("Password cannot be null or empty");
         }
 
@@ -56,7 +56,7 @@ public class AuthService implements UserDetailsService {
         user.setUsername(username.trim());
         user.setEmail(email.trim());
         //Encode le MDP
-        user.setPassword(passwordEncoder.encode(rawPassword));
+        user.setPassword(passwordEncoder.encode(password));
         // Attribut le rôle utilisateur dès la création du compte
         user.setRole("ROLE_USER");
 

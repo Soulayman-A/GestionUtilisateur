@@ -4,7 +4,6 @@ import com.example.security.entity.RefreshToken;
 import com.example.security.entity.User;
 import com.example.security.repository.RefreshTokenRepository;
 import com.example.security.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,11 +16,8 @@ import java.util.UUID;
 @Service
 public class RefreshTokenService {
 
-    private Long refreshTokenDurationMs;
-
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
-    Date expiryDate = Date.from(Instant.now().plus(7, ChronoUnit.DAYS));
 
     public RefreshTokenService(RefreshTokenRepository refreshTokenRepository,
                                UserRepository userRepository) {
@@ -37,18 +33,17 @@ public class RefreshTokenService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-
         RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)
                 .token(UUID.randomUUID().toString())
-                .expiryDate(expiryDate)
+                .expiryDate(Date.from(Instant.now().plus(7, ChronoUnit.DAYS)))
                 .build();
 
         return refreshTokenRepository.save(refreshToken);
     }
 
     public RefreshToken verifyExpiration(RefreshToken token) {
-        if (token.getExpiryDate().compareTo(expiryDate) < 0) {
+        if (token.getExpiryDate().before(new Date())) {
             refreshTokenRepository.delete(token);
             throw new RuntimeException("Refresh token expired. Please login again.");
         }
@@ -56,9 +51,8 @@ public class RefreshTokenService {
     }
 
     @Transactional
-    public void deleteByUserId(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        refreshTokenRepository.deleteByUser(user);
+    public void deleteByToken(String token) {
+        System.out.println(">>> Suppression du token : " + token);
+        refreshTokenRepository.deleteByToken(token);
     }
 }

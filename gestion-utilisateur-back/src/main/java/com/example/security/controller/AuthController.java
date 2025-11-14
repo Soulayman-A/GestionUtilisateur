@@ -11,6 +11,7 @@ import com.example.security.entity.RefreshToken;
 import com.example.security.entity.User;
 import com.example.security.service.AuthService;
 import com.example.security.service.RefreshTokenService;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -62,83 +63,70 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("Username is required");
-        }
-        if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("Password is required");
-        }
-
         UserDetails userDetails = authService.loadUserByUsername(request.getUsername());
 
         if (!passwordEncoder.matches(request.getPassword(), userDetails.getPassword())) {
             return ResponseEntity.status(401).body("Identifiants invalides");
         }
 
-        String role = userDetails.getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
+        String role = userDetails.getAuthorities().stream()
                 .findFirst()
+                .map(GrantedAuthority::getAuthority)
                 .orElse("ROLE_USER");
 
         String accessToken = authService.login(userDetails.getUsername(), role);
-
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getUsername());
 
-        AuthResponse response = new AuthResponse(
-                accessToken,
-                refreshToken.getToken(),
-                userDetails.getUsername()
-        );
+        // Créer un cookie httpOnly
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken.getToken())
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(7 * 24 * 60 * 60)
+                .sameSite("Strict")
+                .build();
 
-        return ResponseEntity.ok(response);
+        // réponse sans refresh token dans le JSON
+        return ResponseEntity.ok()
+                .header("Set-Cookie", cookie.toString())
+                .body(new AuthResponse(accessToken, userDetails.getUsername()));
     }
+
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
-        String requestRefreshToken = request.getRefreshToken();
+    public ResponseEntity<?> refreshToken(@CookieValue("refreshToken") String refreshToken) {
 
-        if (requestRefreshToken == null || requestRefreshToken.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("Refresh token is required");
-        }
+        RefreshToken token = refreshTokenService.findByToken(refreshToken)
+                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
 
-        try {
-            RefreshToken refreshToken = refreshTokenService.findByToken(requestRefreshToken)
-                    .orElseThrow(() -> new RuntimeException("Refresh token not found"));
+        token = refreshTokenService.verifyExpiration(token);
 
-            refreshToken = refreshTokenService.verifyExpiration(refreshToken);
-            User user = refreshToken.getUser();
+        User user = token.getUser();
+        String newAccessToken = authService.login(user.getUsername(), user.getRole());
 
-            String role = user.getRole();
-
-            String accessToken = authService.login(user.getUsername(), role);
-
-            AuthResponse response = new AuthResponse(
-                    accessToken,
-                    requestRefreshToken,
-                    user.getUsername()
-            );
-
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body("Invalid or expired refresh token: " + e.getMessage());
-        }
+        return ResponseEntity.ok(new AuthResponse(newAccessToken, user.getUsername()));
     }
+
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody RefreshTokenRequest request) {
-        String requestRefreshToken = request.getRefreshToken();
+    public ResponseEntity<?> logout(@CookieValue("refreshToken") String refreshToken) {
 
-        if (requestRefreshToken == null || requestRefreshToken.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("Refresh token is required");
-        }
+        // Supprimer le refresh token dans la BDD
+        refreshTokenService.deleteByToken(refreshToken);
 
-        refreshTokenService.findByToken(requestRefreshToken)
-                .ifPresent(token -> refreshTokenService.deleteByUserId(token.getUser().getId()));
+        // Supprimer le cookie
+        ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)   // Supprime le cookie direct
+                .build();
 
-        return ResponseEntity.ok("Logout successful");
+        return ResponseEntity.ok()
+                .header("Set-Cookie", deleteCookie.toString())
+                .body("Logout successful");
     }
+
 
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")

@@ -7,9 +7,10 @@ import {
 } from "react";
 
 interface User {
-  id?: number;
-  username: string;
-  role?: string;
+    id?: number;
+    username: string;
+    role?: string;
+    refreshToken?: string;
 }
 
 interface AuthContextType {
@@ -35,22 +36,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const login = (newToken: string, username: string) => {
-    setToken(newToken);
-    const userData = { username };
-    setUser(userData);
-    localStorage.setItem("token", newToken);
-    localStorage.setItem("user", JSON.stringify(userData));
-  };
+    const login = (accessToken: string, username: string) => {
+        setToken(accessToken);
+        setUser({ username });
+        localStorage.setItem("token", accessToken);
+        localStorage.setItem("user", JSON.stringify({ username }));
+    };
 
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-  };
 
-  const isAuthenticated = !!token;
+    const logout = async () => {
+        await fetch("http://localhost:8080/api/auth/logout", {
+            method: "POST",
+            credentials: "include"
+        });
+
+        setToken(null);
+        setUser(null);
+        localStorage.clear();
+    };
+
+
+
+    const isAuthenticated = !!token;
 
   return (
     <AuthContext.Provider

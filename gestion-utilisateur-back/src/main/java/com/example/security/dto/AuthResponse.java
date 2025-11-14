@@ -6,11 +6,11 @@ public class AuthResponse {
     private String username;
     private String tokenType = "Bearer";
 
-    public AuthResponse(String accessToken, String refreshToken, String username) {
+    public AuthResponse(String accessToken, String username) {
         this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
         this.username = username;
     }
+
 
     public String getAccessToken() {
         return accessToken;
