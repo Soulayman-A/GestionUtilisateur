@@ -36,7 +36,7 @@ public class RefreshTokenService {
         RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)
                 .token(UUID.randomUUID().toString())
-                .expiryDate(Date.from(Instant.now().plus(7, ChronoUnit.DAYS)))
+                .expiryDate(Date.from(Instant.now().plus(7, ChronoUnit.DAYS))) //Temp du refreshToken en jours
                 .build();
 
         return refreshTokenRepository.save(refreshToken);
@@ -52,7 +52,6 @@ public class RefreshTokenService {
 
     @Transactional
     public void deleteByToken(String token) {
-        System.out.println(">>> Suppression du token : " + token);
         refreshTokenRepository.deleteByToken(token);
     }
 }

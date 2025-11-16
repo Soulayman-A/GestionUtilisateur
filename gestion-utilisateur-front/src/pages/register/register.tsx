@@ -2,6 +2,7 @@ import { useState } from "react";
 import {Button, VStack, Input, Field, Box, Text, HStack} from "@chakra-ui/react";
 import {useNavigate} from "react-router-dom";
 
+
 const RegisterPage = () => {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");

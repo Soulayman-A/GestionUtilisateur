@@ -11,6 +11,8 @@ import {
   Link,
   HStack,
 } from "@chakra-ui/react";
+import { useApi } from "../../api/apiFetch";
+
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -19,14 +21,16 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { apiFetch } = useApi();
 
-  async function handleLogin(e: React.FormEvent) {
+
+    async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `${import.meta.env.VITE_API_URL}/auth/login`,
         {
           method: "POST",

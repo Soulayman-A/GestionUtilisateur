@@ -2,6 +2,7 @@ import { VStack, Text, Button, Box, HStack, Spinner } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useApi } from "../../api/apiFetch";
 
 const AdminPage = () => {
   const [loading, setLoading] = useState(true);
@@ -9,6 +10,7 @@ const AdminPage = () => {
   const [adminData, setAdminData] = useState("");
   const [hasAccess, setHasAccess] = useState(false);
   const { token, logout } = useAuth();
+  const { apiFetch } = useApi();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,7 +26,7 @@ const AdminPage = () => {
         throw new Error("Aucun token trouvé, veuillez vous connecter.");
       }
 
-      const response = await fetch(
+      const response = await apiFetch(
         `${import.meta.env.VITE_API_URL}/admin/users`,
         {
           method: "GET",
